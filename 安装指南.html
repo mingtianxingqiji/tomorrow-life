@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明天星期几 - 安装指南</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+    background: #FAFAF8;
+    color: #2D3436;
+    line-height: 1.7;
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 24px; text-align: center; margin: 20px 0; color: #7C9885; }
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    margin: 16px 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .card h2 { font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .step { margin: 12px 0; padding-left: 28px; position: relative; }
+  .step-num {
+    position: absolute; left: 0; top: 0;
+    width: 20px; height: 20px;
+    background: #7C9885; color: #fff;
+    border-radius: 50%; font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-ios { background: #E8F5E9; color: #2E7D32; }
+  .badge-android { background: #FFF3E0; color: #E65100; }
+  .badge-web { background: #E3F2FD; color: #1565C0; }
+  .cmd {
+    background: #1a1a1a;
+    color: #00B894;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: "SF Mono", Monaco, monospace;
+    font-size: 13px;
+    margin: 8px 0;
+    overflow-x: auto;
+  }
+  .highlight { color: #E8A87C; font-weight: 600; }
+  hr { border: none; border-top: 1px solid #E8ECEA; margin: 16px 0; }
+  a { color: #7C9885; }
+  .footer { text-align: center; color: #B2BEC3; font-size: 12px; margin-top: 30px; }
+</style>
+</head>
+<body>
+
+<h1>📱 明天星期几</h1>
+<p style="text-align:center;color:#636E72;margin-bottom:20px;">手机端生活记录APP · 安装指南</p>
+
+<div class="card">
+  <h2>🚀 最快方式：手机浏览器直接打开</h2>
+  <p>解压后，用手机浏览器访问本地文件即可使用。</p>
+
+  <h3 style="margin-top:16px;"><span class="badge badge-web">通用</span> 方法一：本地运行（推荐）</h3>
+  <div class="step"><span class="step-num">1</span>将整个 <span class="highlight">tomorrow-app</span> 文件夹解压到手机或电脑</div>
+  <div class="step"><span class="step-num">2</span>确保手机和电脑在同一WiFi网络</div>
+  <div class="step"><span class="step-num">3</span>在文件夹目录中打开终端/命令行，运行：<div class="cmd">cd tomorrow-app && python3 -m http.server 8080</div></div>
+  <div class="step"><span class="step-num">4</span>查看电脑IP地址，在手机浏览器中访问：<div class="cmd">http://你的电脑IP:8080</div></div>
+
+  <h3 style="margin-top:20px;"><span class="badge badge-ios">iOS</span> 添加到主屏幕</h3>
+  <div class="step"><span class="step-num">1</span>用 <strong>Safari</strong> 打开 APP 地址</div>
+  <div class="step"><span class="step-num">2</span>点击底部中间的 <strong>分享按钮</strong>（方框↑箭头）</div>
+  <div class="step"><span class="step-num">3</span>向下滚动，点击 <strong>「添加到主屏幕」</strong></div>
+  <div class="step"><span class="step-num">4</span>点击右上角「添加」，桌面就会出现APP图标</div>
+  <p style="font-size:13px;color:#636E72;margin-top:8px;">💡 添加后就是一个独立APP了，全屏运行，有离线能力！</p>
+
+  <h3 style="margin-top:20px;"><span class="badge badge-android">Android</span> 安装到桌面</h3>
+  <div class="step"><span class="step-num">1</span>用 <strong>Chrome</strong> 打开 APP 地址</div>
+  <div class="step"><span class="step-num">2</span>浏览器会自动弹出 <strong>「安装应用」</strong> 横幅</div>
+  <div class="step"><span class="step-num">3</span>或点击右上角 ⋮ 菜单 → <strong>「安装应用」/「添加到主屏幕」</strong></div>
+  <div class="step"><span class="step-num">4</span>桌面就会出现APP图标，点击即用！</div>
+</div>
+
+<div class="card">
+  <h2>🌐 方法二：部署到公网（随时随地访问）</h2>
+  <p>如果你有服务器或想用免费托管服务：</p>
+
+  <h3 style="margin-top:16px;">免费托管选项：</h3>
+  <div class="step"><span class="step-num">1</span><strong>GitHub Pages</strong>：上传到 GitHub 仓库，开启 Pages 功能</div>
+  <div class="step"><span class="step-num">2</span><strong>Netlify</strong>：拖拽 tomorrow-app 文件夹到 Netlify 即可部署</div>
+  <div class="step"><span class="step-num">3</span><strong>Vercel</strong>：用 Vercel CLI 一键部署</div>
+  <p style="font-size:13px;color:#636E72;margin-top:8px;">💡 部署后获得一个 https:// 公网地址，在任何设备上都能打开！然后按上面的方法「添加到主屏幕」。</p>
+</div>
+
+<div class="card">
+  <h2>📋 功能清单</h2>
+  <table style="width:100%;font-size:14px;border-collapse:collapse;">
+    <tr><td style="padding:8px 0;">✅</td><td>每日计划（待办+提醒+配图）</td></tr>
+    <tr><td style="padding:8px 0;">✅</td><td>穿搭日记（拍照+场合+风格标签）</td></tr>
+    <tr><td style="padding:8px 0;">✅</td><td>三餐日记（早/中/晚+热量+食材）</td></tr>
+    <tr><td style="padding:8px 0;">✅</td><td>饮品日记（类型+甜度+容量+热量）</td></tr>
+    <tr><td style="padding:8px 0;">✅</td><td>运动日记（类型+指标+健康数据同步）</td></tr>
+    <tr><td style="padding:8px 0;">✅</td><td>全模块图片上传（调用系统图库）</td></tr>
+    <tr><td style="padding:8px 0;">✅</td><td>按日期归档 + 历史记录筛选</td></tr>
+    <tr><td style="padding:8px 0;">✅</td><td>数据本地存储（隐私安全）</td></tr>
+    <tr><td style="padding:8px 0;">✅</td><td>PWA离线可用</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>🔌 运动日记 · 苹果健康数据</h2>
+  <p>在运动日记模块中，点击「连接苹果健康」按钮：</p>
+  <div class="step"><span class="step-num">1</span>支持 <strong>手动输入</strong> 步数、运动时长、卡路里、运动类型</div>
+  <div class="step"><span class="step-num">2</span>在 iOS Safari 中添加到主屏幕后，可配合「<strong>快捷指令</strong>」App 实现自动化健康数据同步</div>
+  <p style="font-size:13px;color:#636E72;margin-top:8px;">💡 这是PWA的技术限制——浏览器无法直接访问HealthKit。如需深度集成，可将本PWA封装为原生App后接入HealthKit SDK。</p>
+</div>
+
+<div class="footer">
+  明天星期几 · 生活记录，从今天开始<br>
+  所有数据存储在你的设备上，不上传任何服务器
+</div>
+
+</body>
+</html>
