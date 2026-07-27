@@ -21,7 +21,7 @@ const OutfitModule = (function() {
           </div>
           <div style="text-align:right;">
             <div style="font-size:28px;font-weight:700;color:var(--primary);">${records.length}</div>
-            <div style="font-size:12px;color:var(--text-hint);">套穿�?</div>
+            <div style="font-size:12px;color:var(--text-hint);">套穿搭</div>
           </div>
         </div>
 
@@ -42,7 +42,7 @@ const OutfitModule = (function() {
   async function renderList(records) {
     const container = document.getElementById('outfitList');
     if (records.length === 0) {
-      container.innerHTML = UI.emptyState('点击右下�? + 记录今日穿搭');
+      container.innerHTML = UI.emptyState('点击右下角 + 记录今日穿搭');
       return;
     }
 
@@ -102,7 +102,7 @@ const OutfitModule = (function() {
         UI.confirm('确定删除这条穿搭记录吗？', () => {
           Storage.deleteRecord(currentDate, 'outfit', idx);
           render(currentDate);
-          UI.toast('已删�?');
+          UI.toast('已删除');
         });
       });
     });
@@ -116,7 +116,7 @@ const OutfitModule = (function() {
 
     const bodyHTML = `
       <div class="form-group">
-        <label class="form-label">穿搭实拍�?</label>
+        <label class="form-label">穿搭实拍图</label>
         <div id="imageUploadArea"></div>
       </div>
       <div class="form-group">
@@ -150,7 +150,7 @@ const OutfitModule = (function() {
         const note = modal.querySelector('#outfitNote').value.trim();
 
         if (!currentImageId && !note && !occasion) {
-          UI.toast('请至少填写一项内�?');
+          UI.toast('请至少填写一项内容');
           return false;
         }
 
@@ -163,10 +163,10 @@ const OutfitModule = (function() {
         };
         if (editIdx !== undefined) {
           Storage.updateRecord(currentDate, 'outfit', editIdx, record);
-          UI.toast('已更�?');
+          UI.toast('已更新');
         } else {
           Storage.addRecord(currentDate, 'outfit', record);
-          UI.toast('已保�?');
+          UI.toast('已保存');
         }
         render(currentDate);
       }
