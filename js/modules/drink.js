@@ -24,6 +24,8 @@ const DrinkModule = (function() {
 
     main.innerHTML = `
       <div class="fade-in">
+        <div class="module-calendar" id="drinkCalendar"></div>
+
         <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-size:13px;color:var(--text-secondary);">${UI.formatDateFull(date)}</div>
@@ -43,6 +45,10 @@ const DrinkModule = (function() {
     renderList(records);
     document.getElementById('fab').style.display = 'flex';
     document.getElementById('fab').onclick = () => showAddModal();
+
+    UI.renderModuleCalendar('drinkCalendar', date, 'drink', (newDate) => {
+      render(newDate);
+    });
   }
 
   async function renderList(records) {

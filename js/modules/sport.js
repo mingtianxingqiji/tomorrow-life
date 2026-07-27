@@ -65,6 +65,8 @@ const SportModule = (function() {
 
     main.innerHTML = `
       <div class="fade-in">
+        <div class="module-calendar" id="sportCalendar"></div>
+
         <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-size:13px;color:var(--text-secondary);">${UI.formatDateFull(date)}</div>
@@ -114,6 +116,10 @@ const SportModule = (function() {
     renderList(records);
     document.getElementById('fab').style.display = 'flex';
     document.getElementById('fab').onclick = () => showAddModal();
+
+    UI.renderModuleCalendar('sportCalendar', date, 'sport', (newDate) => {
+      render(newDate);
+    });
 
     document.getElementById('healthSyncBtn').addEventListener('click', syncHealthData);
   }

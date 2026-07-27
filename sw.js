@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tomorrow-app-v1';
+const CACHE_NAME = 'tomorrow-app-v5';
 const ASSETS = [
   './',
   './index.html',

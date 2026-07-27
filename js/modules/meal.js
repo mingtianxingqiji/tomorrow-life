@@ -23,6 +23,8 @@ const MealModule = (function() {
 
     main.innerHTML = `
       <div class="fade-in">
+        <div class="module-calendar" id="mealCalendar"></div>
+
         <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-size:13px;color:var(--text-secondary);">${UI.formatDateFull(date)}</div>
@@ -50,6 +52,11 @@ const MealModule = (function() {
     mealTypes.forEach(t => renderMealList(t, dayMeal[t.key] || []));
     document.getElementById('fab').style.display = 'flex';
     document.getElementById('fab').onclick = () => showAddModal();
+
+    // 渲染日历条
+    UI.renderModuleCalendar('mealCalendar', date, 'meal', (newDate) => {
+      render(newDate);
+    });
   }
 
   async function renderMealList(mealType, records) {
@@ -61,7 +68,7 @@ const MealModule = (function() {
         </div>
       `;
       container.querySelector('[data-meal]').addEventListener('click', () => {
-        showAddModal(null, mealType.key);
+        showAddModal(undefined, mealType.key);
       });
       return;
     }
@@ -130,7 +137,7 @@ const MealModule = (function() {
   function showAddModal(editIdx, mealKey) {
     if (!mealKey) mealKey = 'breakfast';
     const records = Storage.getMealRecords(currentDate, mealKey);
-    const editing = editIdx !== undefined ? records[editIdx] : null;
+    const editing = editIdx != null ? records[editIdx] : null;
     let currentImageId = editing?.imageId || null;
     const mealType = mealTypes.find(t => t.key === mealKey);
 
@@ -159,33 +166,73 @@ const MealModule = (function() {
       </div>
     `;
 
+    // 使用全局临时变量传递状态
+    window._mealTemp = {
+      imageId: currentImageId,
+      mealKey: mealKey,
+      date: currentDate,
+      editIdx: editIdx
+    };
+
     const { modal } = UI.showModal(`${editing ? '编辑' : '添加'}${mealType.name}`, bodyHTML, {
       confirmText: editing ? '更新' : '保存',
       cancelText: '取消',
-      onConfirm: () => {
-        const name = modal.querySelector('#mealName').value.trim();
-        const ingredients = modal.querySelector('#mealIngredients').value.trim();
-        const calories = modal.querySelector('#mealCalories').value;
-        const feel = modal.querySelector('#mealFeel').value.trim();
+      onConfirm: (modalEl) => {
+        const tmp = window._mealTemp;
+        if (!tmp) return true;
 
-        if (!name && !currentImageId && !ingredients) {
+        const name = modalEl.querySelector('#mealName').value.trim();
+        const ingredients = modalEl.querySelector('#mealIngredients').value.trim();
+        const calories = modalEl.querySelector('#mealCalories').value;
+        const feel = modalEl.querySelector('#mealFeel').value.trim();
+
+        if (!name && !tmp.imageId && !ingredients) {
           UI.toast('请至少填写一项内容');
           return false;
         }
 
-        const record = { name, ingredients, calories, feel, imageId: currentImageId };
-        const currentRecords = Storage.getMealRecords(currentDate, mealKey);
-        if (editIdx !== undefined) {
-          currentRecords[editIdx] = record;
+        const record = { name, ingredients, calories, feel, imageId: tmp.imageId };
+        const currentRecords = Storage.getMealRecords(tmp.date, tmp.mealKey);
+        if (tmp.editIdx != null) {
+          currentRecords[tmp.editIdx] = record;
           UI.toast('已更新');
         } else {
           currentRecords.push(record);
           UI.toast('已保存');
         }
-        Storage.saveMealRecords(currentDate, mealKey, currentRecords);
-        render(currentDate);
+        Storage.saveMealRecords(tmp.date, tmp.mealKey, currentRecords);
+        delete window._mealTemp;
+        render(tmp.date);
+        return true;
       }
     });
+
+    // 直接绑定确认按钮（兜底方案，确保三餐保存正常）
+    setTimeout(() => {
+      const confirmBtn = modal.querySelector('[data-action="confirm"]');
+      if (confirmBtn) {
+        confirmBtn.onclick = function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          const tmp = window._mealTemp;
+          if (!tmp) return;
+          const m = this.closest('.modal');
+          const name = m.querySelector('#mealName').value.trim();
+          const ingredients = m.querySelector('#mealIngredients').value.trim();
+          const calories = m.querySelector('#mealCalories').value;
+          const feel = m.querySelector('#mealFeel').value.trim();
+          if (!name && !tmp.imageId && !ingredients) { UI.toast('请至少填写一项内容'); return; }
+          const record = { name, ingredients, calories, feel, imageId: tmp.imageId };
+          const currentRecords = Storage.getMealRecords(tmp.date, tmp.mealKey);
+          if (tmp.editIdx != null) { currentRecords[tmp.editIdx] = record; UI.toast('已更新'); }
+          else { currentRecords.push(record); UI.toast('已保存'); }
+          Storage.saveMealRecords(tmp.date, tmp.mealKey, currentRecords);
+          delete window._mealTemp;
+          UI.closeModal();
+          render(tmp.date);
+        };
+      }
+    }, 100);
 
     modal.querySelector('#imageUploadArea').appendChild(
       UI.createImageUploadArea(currentImageId, (newId) => { currentImageId = newId; })

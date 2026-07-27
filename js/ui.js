@@ -92,7 +92,7 @@ const UI = (function() {
           close();
         }
       }
-    });
+    }, false);
     overlay.addEventListener('click', close);
 
     return { modal, close };
@@ -251,6 +251,66 @@ const UI = (function() {
     `;
   }
 
+  // 模块内日历条
+  function renderModuleCalendar(containerId, currentDate, moduleName, onDateClick) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const today = formatDate(new Date());
+    const allDates = Storage.getAllDates();
+    const shortWeek = ['日','一','二','三','四','五','六'];
+
+    // 获取该模块有记录的日期
+    const recordDates = new Set();
+    allDates.forEach(d => {
+      const records = Storage.getModuleRecords(d, moduleName);
+      if (moduleName === 'meal') {
+        const meal = records;
+        const has = (meal.breakfast||[]).length + (meal.lunch||[]).length + (meal.dinner||[]).length;
+        if (has > 0) recordDates.add(d);
+      } else if (Array.isArray(records) && records.length > 0) {
+        recordDates.add(d);
+      }
+    });
+
+    // 生成最近30天的日历
+    const days = [];
+    const d = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(d);
+      date.setDate(date.getDate() - i);
+      const dateStr = formatDate(date);
+      days.push({
+        date: dateStr,
+        day: date.getDate(),
+        week: shortWeek[date.getDay()],
+        isToday: dateStr === today,
+        isActive: dateStr === currentDate,
+        hasRecord: recordDates.has(dateStr)
+      });
+    }
+
+    container.innerHTML = '<div class="calendar-strip">' + days.map(day => `
+      <div class="calendar-day ${day.isToday ? 'today' : ''} ${day.isActive ? 'active' : ''} ${day.hasRecord ? 'has-record' : ''}" data-date="${day.date}">
+        <span class="calendar-date-num">${day.day}</span>
+        <span class="calendar-date-week">${day.week}</span>
+      </div>
+    `).join('') + '</div>';
+
+    // 绑定点击
+    container.querySelectorAll('.calendar-day').forEach(el => {
+      el.addEventListener('click', () => {
+        onDateClick(el.dataset.date);
+      });
+    });
+
+    // 自动滚动到今天
+    const todayEl = container.querySelector('.today');
+    if (todayEl) {
+      container.scrollLeft = todayEl.offsetLeft - 60;
+    }
+  }
+
   return {
     weekdays,
     weekdaysEn,
@@ -269,6 +329,7 @@ const UI = (function() {
     pickImage,
     createImageUploadArea,
     createTagInput,
-    emptyState
+    emptyState,
+    renderModuleCalendar
   };
 })();

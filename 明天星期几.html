@@ -1,17 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#7C9885">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="明天星期几">
-<meta name="mobile-web-app-capable" content="yes">
-<title>明天星期几</title>
-<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIuaYjuWkqeaYn+acn+WHoCIsICJzaG9ydF9uYW1lIjogIuaYjuWkqeaYn+acn+WHoCIsICJkZXNjcmlwdGlvbiI6ICLnlJ/mtLvorrDlvZVBUFAgLSDmr4/ml6XorqHliJLCt+epv+aQrcK35LiJ6aSQwrfppa7lk4HCt+i/kOWKqCIsICJzdGFydF91cmwiOiAiLi8iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwgImJhY2tncm91bmRfY29sb3IiOiAiI0ZBRkFGOCIsICJ0aGVtZV9jb2xvciI6ICIjN0M5ODg1IiwgImxhbmciOiAiemgtQ04iLCAiaWNvbnMiOiBbXX0=">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><rect width=%22192%22 height=%22192%22 rx=%2242%22 fill=%22%237C9885%22/><text x=%2296%22 y=%22116%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2272%22 font-family=%22sans-serif%22>?</text></svg>">
-<style>/* ===== 全局变量 ===== */
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#7C9885"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="明天星期几"><meta name="mobile-web-app-capable" content="yes"><title>明天星期几</title><link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIuaYjuWkqeaYn+acn+WHoCIsICJzaG9ydF9uYW1lIjogIuaYjuWkqeaYn+acn+WHoCIsICJkZXNjcmlwdGlvbiI6ICLnlJ/mtLvorrDlvZVBUFAiLCAic3RhcnRfdXJsIjogIi4vIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGQUZBRjgiLCAidGhlbWVfY29sb3IiOiAiIzdDOTg4NSIsICJsYW5nIjogInpoLUNOIiwgImljb25zIjogW119"><style>/* ===== 全局变量 ===== */
 :root {
   --primary: #7C9885;
   --primary-light: #A8C0B0;
@@ -936,10 +923,7 @@ img { display: block; max-width: 100%; }
 .main-content::-webkit-scrollbar,
 .modal-body::-webkit-scrollbar,
 .sidebar-nav::-webkit-scrollbar { width: 0; }
-</style>
-</head>
-<body>
-
+</style></head><body>
   <div id="app">
     <!-- 顶部导航栏 -->
     <header class="app-header">
@@ -1040,8 +1024,7 @@ img { display: block; max-width: 100%; }
   <!-- Toast 提示 -->
   <div class="toast" id="toast"></div>
 
-  
-<script>/**
+  <script>/**
  * 存储模块
  * - 普通数据使用 localStorage
  * - 图片数据使用 IndexedDB（Base64 存储在 localStorage 会爆容量）
@@ -2571,7 +2554,7 @@ const DrinkModule = (function() {
 
 /**
  * 运动日记模块
- * 支持手动记录 + 苹果健康App数据同步（通过 HealthKit Web API 桥接）
+ * 支持手动记录 + URL Scheme 接收健康数据（配合 iOS 快捷指令自动同步）
  */
 const SportModule = (function() {
 
@@ -2589,6 +2572,31 @@ const SportModule = (function() {
     { name: '球类运动', icon: '⚽' },
     { name: '其他', icon: '🏅' }
   ];
+
+  // 监听 URL Scheme 回调，接收来自快捷指令的健康数据
+  window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    if (params.get('action') === 'healthSync') {
+      const steps = parseInt(params.get('steps')) || 0;
+      const duration = parseInt(params.get('duration')) || 0;
+      const calories = parseInt(params.get('calories')) || 0;
+      const types = (params.get('types') || '').split(',').filter(Boolean);
+      const date = params.get('date') || Storage.formatDate(new Date());
+
+      if (steps || duration || calories) {
+        healthData = { steps, duration, calories, sportTypes: types, syncedAt: Date.now() };
+        healthConnected = true;
+        Storage.setData('healthConnected', true);
+        Storage.setData('healthData_' + date, healthData);
+        UI.toast('✅ 健康数据已自动同步');
+
+        // 清理 URL hash
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+    }
+  });
 
   function render(date) {
     currentDate = date;
@@ -2735,37 +2743,56 @@ const SportModule = (function() {
   }
 
   function showHealthManualInput() {
-    UI.confirm(
-      '当前环境无法自动读取苹果健康数据。是否手动输入今日健康数据？',
-      () => {
-        const bodyHTML = `
-          <div class="form-group">
-            <label class="form-label">步数</label>
-            <input type="number" class="form-input" id="manualSteps" placeholder="如：8000" value="${healthData?.steps || ''}">
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">运动时长 (分钟)</label>
-              <input type="number" class="form-input" id="manualDuration" placeholder="如：30" value="${healthData?.duration || ''}">
-            </div>
-            <div class="form-group">
-              <label class="form-label">消耗卡路里</label>
-              <input type="number" class="form-input" id="manualCalories" placeholder="如：200" value="${healthData?.calories || ''}">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">运动类型（逗号分隔）</label>
-            <input type="text" class="form-input" id="manualTypes" placeholder="如：步行,跑步" value="${healthData?.sportTypes ? healthData.sportTypes.join(',') : ''}">
-          </div>
-          <div style="background:var(--primary-bg);padding:12px;border-radius:8px;font-size:12px;color:var(--text-secondary);margin-top:8px;">
-            💡 提示：在 iOS Safari 中将本应用添加到主屏幕后，可配合「快捷指令」App 自动化同步苹果健康数据。
-          </div>
-        `;
+    // 获取当前 APP 的 URL 基础地址
+    const appUrl = window.location.origin + window.location.pathname;
+    const shortcutUrl = appUrl + '#action=healthSync&steps=STEPS&duration=DURATION&calories=CALORIES&types=TYPES&date=DATE';
 
+    const bodyHTML = `
+      <div style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);padding:16px;border-radius:12px;margin-bottom:16px;">
+        <div style="font-weight:600;font-size:15px;margin-bottom:8px;">📲 两种同步方式</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+          <strong>方式一：自动同步（推荐）</strong><br>
+          打开 iOS「快捷指令」App → 新建自动化 → 添加"查找健康样本"操作 → 添加"打开URL"操作 → 粘贴下方URL模板<br><br>
+          <strong>方式二：手动输入</strong><br>
+          直接在下方填写今日数据
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📋 快捷指令 URL 模板（复制到快捷指令中）</label>
+        <textarea class="form-textarea" readonly style="font-size:11px;font-family:monospace;height:60px;background:#f5f5f5;" id="shortcutUrl">${shortcutUrl}</textarea>
+        <button class="btn btn-secondary" style="margin-top:6px;width:100%;padding:8px;" id="copyShortcutBtn">📋 复制快捷指令 URL</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+
+      <div class="form-group">
+        <label class="form-label">步数</label>
+        <input type="number" class="form-input" id="manualSteps" placeholder="如：8000" value="${healthData?.steps || ''}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">运动时长 (分钟)</label>
+          <input type="number" class="form-input" id="manualDuration" placeholder="如：30" value="${healthData?.duration || ''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">消耗卡路里</label>
+          <input type="number" class="form-input" id="manualCalories" placeholder="如：200" value="${healthData?.calories || ''}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">运动类型（逗号分隔）</label>
+        <input type="text" class="form-input" id="manualTypes" placeholder="如：步行,跑步" value="${healthData?.sportTypes ? healthData.sportTypes.join(',') : ''}">
+      </div>
+    `;
+
+    UI.confirm(
+      '选择健康数据同步方式',
+      () => {
         UI.closeModal();
         setTimeout(() => {
-          const { modal } = UI.showModal('手动输入健康数据', bodyHTML, {
-            confirmText: '保存',
+          const { modal } = UI.showModal('同步健康数据', bodyHTML, {
+            confirmText: '保存数据',
             cancelText: '取消',
             onConfirm: () => {
               const steps = parseInt(modal.querySelector('#manualSteps').value) || 0;
@@ -2780,6 +2807,16 @@ const SportModule = (function() {
               UI.toast('健康数据已保存');
               render(currentDate);
             }
+          });
+
+          // 复制按钮
+          modal.querySelector('#copyShortcutBtn').addEventListener('click', () => {
+            const url = modal.querySelector('#shortcutUrl').value;
+            navigator.clipboard.writeText(url).then(() => {
+              UI.toast('URL 已复制！粘贴到快捷指令中');
+            }).catch(() => {
+              UI.toast('请手动复制上方URL');
+            });
           });
         }, 300);
       }
@@ -3131,15 +3168,8 @@ style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
 document.head.appendChild(style);
 
 
-// 内联Service Worker
-if ('serviceWorker' in navigator) {
-  const swBlob = new Blob(["const CACHE_NAME = 'tomorrow-app-v1';\nconst ASSETS = [\n  './',\n  './index.html',\n  './css/style.css',\n  './js/storage.js',\n  './js/ui.js',\n  './js/app.js',\n  './js/sw-register.js',\n  './js/modules/home.js',\n  './js/modules/plan.js',\n  './js/modules/outfit.js',\n  './js/modules/meal.js',\n  './js/modules/drink.js',\n  './js/modules/sport.js',\n  './manifest.json',\n  './assets/icons/icon-192.png',\n  './assets/icons/icon-512.png'\n];\n\nself.addEventListener('install', (e) => {\n  e.waitUntil(\n    caches.open(CACHE_NAME).then(cache => {\n      return cache.addAll(ASSETS).catch(err => {\n        console.warn('\u90e8\u5206\u8d44\u6e90\u7f13\u5b58\u5931\u8d25:', err);\n      });\n    })\n  );\n  self.skipWaiting();\n});\n\nself.addEventListener('activate', (e) => {\n  e.waitUntil(\n    caches.keys().then(keys => {\n      return Promise.all(\n        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))\n      );\n    })\n  );\n  self.clients.claim();\n});\n\nself.addEventListener('fetch', (e) => {\n  // \u53ea\u7f13\u5b58\u540c\u6e90 GET \u8bf7\u6c42\n  if (e.request.method !== 'GET') return;\n\n  e.respondWith(\n    caches.match(e.request).then(cached => {\n      // \u7f51\u7edc\u4f18\u5148\uff0c\u5931\u8d25\u56de\u9000\u7f13\u5b58\uff08\u9002\u7528\u4e8e\u52a8\u6001\u5185\u5bb9\uff09\n      return fetch(e.request).then(response => {\n        // \u7f13\u5b58\u65b0\u8d44\u6e90\n        if (response && response.status === 200 && response.type === 'basic') {\n          const clone = response.clone();\n          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));\n        }\n        return response;\n      }).catch(() => {\n        return cached || caches.match('./index.html');\n      });\n    })\n  );\n});\n"], {type: 'application/javascript'});
-  const swUrl = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl, {scope: './'}).then(reg => {
-    console.log('SW registered');
-  }).catch(err => {
-    console.warn('SW registration failed:', err);
-  });
+if('serviceWorker' in navigator){
+  const b=new Blob(["const CACHE_NAME = 'tomorrow-app-v1';\nconst ASSETS = [\n  './',\n  './index.html',\n  './css/style.css',\n  './js/storage.js',\n  './js/ui.js',\n  './js/app.js',\n  './js/sw-register.js',\n  './js/modules/home.js',\n  './js/modules/plan.js',\n  './js/modules/outfit.js',\n  './js/modules/meal.js',\n  './js/modules/drink.js',\n  './js/modules/sport.js',\n  './manifest.json',\n  './assets/icons/icon-192.png',\n  './assets/icons/icon-512.png'\n];\n\nself.addEventListener('install', (e) => {\n  e.waitUntil(\n    caches.open(CACHE_NAME).then(cache => {\n      return cache.addAll(ASSETS).catch(err => {\n        console.warn('\u90e8\u5206\u8d44\u6e90\u7f13\u5b58\u5931\u8d25:', err);\n      });\n    })\n  );\n  self.skipWaiting();\n});\n\nself.addEventListener('activate', (e) => {\n  e.waitUntil(\n    caches.keys().then(keys => {\n      return Promise.all(\n        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))\n      );\n    })\n  );\n  self.clients.claim();\n});\n\nself.addEventListener('fetch', (e) => {\n  // \u53ea\u7f13\u5b58\u540c\u6e90 GET \u8bf7\u6c42\n  if (e.request.method !== 'GET') return;\n\n  e.respondWith(\n    caches.match(e.request).then(cached => {\n      // \u7f51\u7edc\u4f18\u5148\uff0c\u5931\u8d25\u56de\u9000\u7f13\u5b58\uff08\u9002\u7528\u4e8e\u52a8\u6001\u5185\u5bb9\uff09\n      return fetch(e.request).then(response => {\n        // \u7f13\u5b58\u65b0\u8d44\u6e90\n        if (response && response.status === 200 && response.type === 'basic') {\n          const clone = response.clone();\n          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));\n        }\n        return response;\n      }).catch(() => {\n        return cached || caches.match('./index.html');\n      });\n    })\n  );\n});\n"],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(b),{scope:'./'}).then(r=>console.log('SW OK')).catch(e=>console.warn('SW:',e));
 }
-</script>
-</body></html>
+</script></body></html>

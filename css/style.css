@@ -585,7 +585,7 @@ img { display: block; max-width: 100%; }
 }
 .plan-meta-item { display: flex; align-items: center; gap: 3px; }
 .plan-thumb {
-  width: 50px; height: 50px;
+  width: 72px; height: 72px;
   border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
@@ -614,7 +614,7 @@ img { display: block; max-width: 100%; }
 }
 .outfit-img {
   width: 100%;
-  aspect-ratio: 3/4;
+  aspect-ratio: 1/1;
   object-fit: cover;
   background: var(--primary-bg);
 }
@@ -830,7 +830,8 @@ img { display: block; max-width: 100%; }
 .sport-note { font-size: 13px; color: var(--text-secondary); padding-top: 10px; border-top: 1px solid var(--border); }
 .sport-thumb {
   width: 100%;
-  max-height: 180px;
+  aspect-ratio: 1/1;
+  max-height: 200px;
   object-fit: cover;
   border-radius: var(--radius-sm);
   margin-bottom: 10px;
@@ -923,3 +924,70 @@ img { display: block; max-width: 100%; }
 .main-content::-webkit-scrollbar,
 .modal-body::-webkit-scrollbar,
 .sidebar-nav::-webkit-scrollbar { width: 0; }
+
+/* ===== 模块内日历条 ===== */
+.module-calendar {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.module-calendar::-webkit-scrollbar { height: 0; }
+.calendar-strip {
+  display: flex;
+  gap: 8px;
+  min-width: max-content;
+}
+.calendar-day {
+  flex-shrink: 0;
+  width: 44px;
+  text-align: center;
+  padding: 8px 0;
+  border-radius: 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1.5px solid transparent;
+}
+.calendar-day:active { background: var(--primary-bg); }
+.calendar-day.today {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+.calendar-day.active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+.calendar-day.has-record {
+  position: relative;
+}
+.calendar-day.has-record::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.calendar-day.today.has-record::after {
+  background: rgba(255,255,255,0.8);
+}
+.calendar-date-num {
+  font-size: 16px;
+  font-weight: 500;
+  display: block;
+}
+.calendar-date-week {
+  font-size: 10px;
+  margin-top: 2px;
+  opacity: 0.7;
+}
