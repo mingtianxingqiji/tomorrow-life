@@ -1,6 +1,6 @@
 /**
  * 运动日记模块
- * 支持手动记录 + 苹果健康App数据同步（通过 HealthKit Web API 桥接）
+ * 支持手动记录 + URL Scheme 接收健康数据（配合 iOS 快捷指令自动同步）
  */
 const SportModule = (function() {
 
@@ -18,6 +18,31 @@ const SportModule = (function() {
     { name: '球类运动', icon: '⚽' },
     { name: '其他', icon: '🏅' }
   ];
+
+  // 监听 URL Scheme 回调，接收来自快捷指令的健康数据
+  window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    if (params.get('action') === 'healthSync') {
+      const steps = parseInt(params.get('steps')) || 0;
+      const duration = parseInt(params.get('duration')) || 0;
+      const calories = parseInt(params.get('calories')) || 0;
+      const types = (params.get('types') || '').split(',').filter(Boolean);
+      const date = params.get('date') || Storage.formatDate(new Date());
+
+      if (steps || duration || calories) {
+        healthData = { steps, duration, calories, sportTypes: types, syncedAt: Date.now() };
+        healthConnected = true;
+        Storage.setData('healthConnected', true);
+        Storage.setData('healthData_' + date, healthData);
+        UI.toast('✅ 健康数据已自动同步');
+
+        // 清理 URL hash
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+    }
+  });
 
   function render(date) {
     currentDate = date;
@@ -164,37 +189,56 @@ const SportModule = (function() {
   }
 
   function showHealthManualInput() {
-    UI.confirm(
-      '当前环境无法自动读取苹果健康数据。是否手动输入今日健康数据？',
-      () => {
-        const bodyHTML = `
-          <div class="form-group">
-            <label class="form-label">步数</label>
-            <input type="number" class="form-input" id="manualSteps" placeholder="如：8000" value="${healthData?.steps || ''}">
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">运动时长 (分钟)</label>
-              <input type="number" class="form-input" id="manualDuration" placeholder="如：30" value="${healthData?.duration || ''}">
-            </div>
-            <div class="form-group">
-              <label class="form-label">消耗卡路里</label>
-              <input type="number" class="form-input" id="manualCalories" placeholder="如：200" value="${healthData?.calories || ''}">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">运动类型（逗号分隔）</label>
-            <input type="text" class="form-input" id="manualTypes" placeholder="如：步行,跑步" value="${healthData?.sportTypes ? healthData.sportTypes.join(',') : ''}">
-          </div>
-          <div style="background:var(--primary-bg);padding:12px;border-radius:8px;font-size:12px;color:var(--text-secondary);margin-top:8px;">
-            💡 提示：在 iOS Safari 中将本应用添加到主屏幕后，可配合「快捷指令」App 自动化同步苹果健康数据。
-          </div>
-        `;
+    // 获取当前 APP 的 URL 基础地址
+    const appUrl = window.location.origin + window.location.pathname;
+    const shortcutUrl = appUrl + '#action=healthSync&steps=STEPS&duration=DURATION&calories=CALORIES&types=TYPES&date=DATE';
 
+    const bodyHTML = `
+      <div style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);padding:16px;border-radius:12px;margin-bottom:16px;">
+        <div style="font-weight:600;font-size:15px;margin-bottom:8px;">📲 两种同步方式</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+          <strong>方式一：自动同步（推荐）</strong><br>
+          打开 iOS「快捷指令」App → 新建自动化 → 添加"查找健康样本"操作 → 添加"打开URL"操作 → 粘贴下方URL模板<br><br>
+          <strong>方式二：手动输入</strong><br>
+          直接在下方填写今日数据
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📋 快捷指令 URL 模板（复制到快捷指令中）</label>
+        <textarea class="form-textarea" readonly style="font-size:11px;font-family:monospace;height:60px;background:#f5f5f5;" id="shortcutUrl">${shortcutUrl}</textarea>
+        <button class="btn btn-secondary" style="margin-top:6px;width:100%;padding:8px;" id="copyShortcutBtn">📋 复制快捷指令 URL</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+
+      <div class="form-group">
+        <label class="form-label">步数</label>
+        <input type="number" class="form-input" id="manualSteps" placeholder="如：8000" value="${healthData?.steps || ''}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">运动时长 (分钟)</label>
+          <input type="number" class="form-input" id="manualDuration" placeholder="如：30" value="${healthData?.duration || ''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">消耗卡路里</label>
+          <input type="number" class="form-input" id="manualCalories" placeholder="如：200" value="${healthData?.calories || ''}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">运动类型（逗号分隔）</label>
+        <input type="text" class="form-input" id="manualTypes" placeholder="如：步行,跑步" value="${healthData?.sportTypes ? healthData.sportTypes.join(',') : ''}">
+      </div>
+    `;
+
+    UI.confirm(
+      '选择健康数据同步方式',
+      () => {
         UI.closeModal();
         setTimeout(() => {
-          const { modal } = UI.showModal('手动输入健康数据', bodyHTML, {
-            confirmText: '保存',
+          const { modal } = UI.showModal('同步健康数据', bodyHTML, {
+            confirmText: '保存数据',
             cancelText: '取消',
             onConfirm: () => {
               const steps = parseInt(modal.querySelector('#manualSteps').value) || 0;
@@ -209,6 +253,16 @@ const SportModule = (function() {
               UI.toast('健康数据已保存');
               render(currentDate);
             }
+          });
+
+          // 复制按钮
+          modal.querySelector('#copyShortcutBtn').addEventListener('click', () => {
+            const url = modal.querySelector('#shortcutUrl').value;
+            navigator.clipboard.writeText(url).then(() => {
+              UI.toast('URL 已复制！粘贴到快捷指令中');
+            }).catch(() => {
+              UI.toast('请手动复制上方URL');
+            });
           });
         }, 300);
       }
